@@ -497,7 +497,7 @@ func containerLXCLoad(s *state.State, args db.ContainerArgs, profiles []api.Prof
 func containerLXCUnload(c *containerLXC) {
 	runtime.SetFinalizer(c, nil)
 	if c.c != nil {
-		lxc.Release(c.c)
+		c.c.Release()
 		c.c = nil
 	}
 }
@@ -7627,7 +7627,7 @@ func (c *containerLXC) fillNetworkDevice(name string, m types.Device) (types.Dev
 		cname := projectPrefix(c.Project(), c.Name())
 		cc, err := lxc.NewContainer(cname, c.state.OS.LxcPath)
 		if err == nil {
-			defer lxc.Release(cc)
+			defer cc.Release()
 
 			interfaces, err := cc.Interfaces()
 			if err == nil {
@@ -7894,7 +7894,7 @@ func (c *containerLXC) removeNetworkDevice(name string, m types.Device) error {
 	if err != nil {
 		return err
 	}
-	defer lxc.Release(cc)
+	defer cc.Release()
 
 	// Remove the interface from the container
 	err = cc.DetachInterfaceRename(m["name"], hostName)
